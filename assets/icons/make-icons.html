@@ -1,0 +1,61 @@
+<!-- 本页离线运行，通过 <canvas> 生成 16/32/48/128 四个 PNG 占位图并下载 -->
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+      <meta charset="UTF-8" />
+      <title>生成占位图标</title>
+      <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 16px; }
+        .row { margin: 12px 0; }
+        canvas { border: 1px dashed #999; margin-right: 8px; vertical-align: middle; }
+        button { padding: 6px 12px; }
+      </style>
+    </head>
+    <body>
+      <!-- 说明文字，提示用户点击按钮后下载图标文件 -->
+      <h1>生成 Chrome 扩展占位图标</h1>
+      <p>点击下方按钮，会生成四个尺寸的透明底灰色“M”字方块图标并自动下载为 PNG 文件。下载后请放入 <code>assets/icons</code> 目录，并命名为 <code>icon16.png</code>、<code>icon32.png</code>、<code>icon48.png</code>、<code>icon128.png</code>。</p>
+    
+      <!-- 生成与下载按钮 -->
+      <div class="row">
+        <button id="gen">生成并下载四个尺寸图标</button>
+      </div>
+    
+      <!-- 预览区域：四个 canvas 分别渲染 16/32/48/128 -->
+      <div class="row" id="preview"></div>
+    
+      <script>
+        // 定义四种需要的尺寸
+        const sizes = [16, 32, 48, 128];                               // 图标尺寸数组
+        // 绑定按钮点击事件
+        document.getElementById('gen').addEventListener('click', () => {
+          const preview = document.getElementById('preview');          // 获取预览容器
+          preview.innerHTML = '';                                       // 清空旧预览
+          sizes.forEach(size => {                                        // 遍历每个尺寸
+            const c = document.createElement('canvas');                 // 创建 canvas
+            c.width = size;                                             // 设定宽度
+            c.height = size;                                            // 设定高度
+            const ctx = c.getContext('2d');                             // 获取 2D 上下文
+            ctx.clearRect(0, 0, size, size);                            // 清空为透明
+            ctx.fillStyle = '#e5e7eb';                                  // 设置浅灰填充色
+            ctx.fillRect(0, 0, size, size);                             // 绘制方块背景
+            ctx.fillStyle = '#111827';                                  // 设置深色文字
+            ctx.font = `${Math.floor(size * 0.7)}px system-ui`;         // 按比例设置字体大小
+            ctx.textBaseline = 'middle';                                // 文字垂直基线
+            ctx.textAlign = 'center';                                   // 文字水平对齐
+            ctx.fillText('M', size / 2, size / 2 + 1);                  // 居中绘制字母 M
+            preview.appendChild(c);                                     // 加到预览区
+    
+            c.toBlob(blob => {                                          // 转为 PNG Blob
+              const a = document.createElement('a');                    // 创建下载链接
+              a.download = `icon${size}.png`;                           // 设置下载文件名
+              a.href = URL.createObjectURL(blob);                       // 生成临时 URL
+              a.click();                                                // 触发下载
+              URL.revokeObjectURL(a.href);                              // 释放 URL
+            }, 'image/png');                                            // 指定导出为 PNG
+          });
+        });
+      </script>
+    </body>
+    </html>
+    

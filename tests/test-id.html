@@ -1,0 +1,64 @@
+<!-- 纯原生无依赖的测试页：直接在浏览器打开即可运行 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>ID 生成单元测试</title>
+  <style>
+    /* 简单的测试结果样式，绿色通过、红色失败 */
+    body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 16px; }
+    .pass { color: #0a7a0a; }
+    .fail { color: #b00020; }
+    .item { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <!-- 测试结果容器 -->
+  <h1>ID 生成单元测试</h1>
+  <div id="log"></div>
+
+  <!-- 以 ES Module 方式引入被测代码 -->
+  <script type="module">
+    // 引入被测的 generateId 函数
+    import { generateId } from '../lib/id.js';
+
+    // 获取日志容器
+    const $log = document.getElementById('log');
+
+    // 最小断言工具：根据条件渲染一行通过/失败
+    function assert(desc, condition) {
+      const div = document.createElement('div');        // 创建一条日志节点
+      div.className = 'item ' + (condition ? 'pass' : 'fail'); // 根据结果设置 class
+      div.textContent = (condition ? '✔︎ 通过：' : '✘ 失败：') + desc; // 输出文案
+      $log.appendChild(div);                             // 追加到日志容器
+      if (!condition) {                                  // 如果失败，顺便在控制台抛出错误
+        console.error('断言失败：' + desc);
+      }
+    }
+
+    // 用例 1：生成的 ID 应为长度 32 的十六进制字符串
+    (function testLengthAndCharset() {
+      const id = generateId();                           // 生成一个 ID
+      const isLen32 = id.length === 32;                  // 判断长度是否为 32
+      const isHex = /^[0-9a-f]{32}$/.test(id);           // 用正则校验是否仅含 0-9a-f
+      assert('ID 长度应为 32', isLen32);                 // 断言长度
+      assert('ID 仅包含十六进制字符', isHex);           // 断言字符集
+    })();
+
+    // 用例 2：连续生成 10_000 个 ID，检查无重复（概率极低）
+    (async function testUniqueness() {
+      const set = new Set();                             // 使用 Set 记录已见 ID
+      let unique = true;                                 // 标记是否全部唯一
+      for (let i = 0; i < 10000; i++) {                  // 生成 1 万次
+        const id = generateId();                         // 生成一个 ID
+        if (set.has(id)) {                               // 检查是否重复
+          unique = false;                                // 标记为出现重复
+          break;                                         // 终止循环
+        }
+        set.add(id);                                     // 记录到集合
+      }
+      assert('1 万次生成应无重复', unique);              // 断言结果
+    })();
+  </script>
+</body>
+</html>
