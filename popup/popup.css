@@ -1,51 +1,222 @@
 /* 设置弹窗基础宽度与字体 */
-html, body { margin: 0; padding: 0; } /* 去除默认外边距 */
-body { width: 380px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111827; background: #ffffff; } /* 设定主体宽度与基础字体 */
+html, body { margin: 0; padding: 0; }
+body {
+  width: 380px;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111827;
+  background: #ffffff;
+}
 
-/* 标题样式与分隔 */
-.title { font-size: 16px; font-weight: 600; margin: 12px 12px 8px 12px; } /* 顶部标题的字号与外边距 */
+/* 标题样式与间距 */
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 12px 12px 8px 12px;
+}
 
 /* 编辑区域布局 */
-.editor { display: flex; flex-direction: column; gap: 8px; padding: 0 12px 8px 12px; } /* 输入区使用纵向布局并设置间距与内边距 */
-#newContent { resize: vertical; min-height: 60px; max-height: 200px; padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; line-height: 1.4; } /* 多行输入框的尺寸与样式 */
-#newContent:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148,163,184,0.25); } /* 聚焦时的高亮边框阴影 */
-#saveBtn { align-self: flex-end; height: 32px; padding: 0 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #111827; color: #fff; font-size: 13px; cursor: pointer; } /* 保存按钮样式 */
-#saveBtn[disabled] { background: #9ca3af; cursor: not-allowed; } /* 禁用时的按钮状态 */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 8px 12px;
+}
+#newContent {
+  resize: vertical;
+  min-height: 60px;
+  max-height: 200px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#newContent:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.25);
+}
+#saveBtn {
+  align-self: flex-end;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #111827;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+#saveBtn[disabled] {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
 
-/* 消息提示条 */
-#msg { min-height: 20px; margin: 0 12px 8px 12px; font-size: 12px; color: #b00020; } /* 提示容器的最小高度与样式 */
-#msg.ok { color: #0a7a0a; } /* 成功消息为绿色 */
-#msg.warn { color: #b45309; } /* 警告消息为橙色 */
+/* 消息提示区域 */
+#msg {
+  min-height: 20px;
+  margin: 0 12px 8px 12px;
+  font-size: 12px;
+  color: #b00020;
+}
+#msg.ok { color: #0a7a0a; }
+#msg.warn { color: #b45309; }
 
 /* 列表容器与可滚动区域 */
-.list { list-style: none; margin: 0; padding: 0 12px 12px 12px; max-height: 320px; overflow-y: auto; } /* 列表去圆点并允许滚动 */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 12px 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
 
 /* 单条笔记项的卡片样式 */
-.item { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; background: #f9fafb; } /* 卡片背景与边框 */
-.item .row { display: flex; align-items: flex-start; gap: 8px; } /* 行内容布局 */
-.item .text { flex: 1; white-space: pre-wrap; word-break: break-word; font-size: 13px; } /* 正文文本样式，允许换行 */
-.item .meta { font-size: 11px; color: #6b7280; margin-top: 4px; } /* 元数据时间样式 */
+.item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #f9fafb;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.item .row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.item .text {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  color: inherit;
+}
+.item .meta {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* 完成态灰色显示 */
+.item.completed {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+.item.completed .text {
+  color: #6b7280;
+  text-decoration: line-through;
+}
+.item.completed .meta {
+  color: #9ca3af;
+}
 
 /* 操作按钮区域 */
-.actions { display: flex; gap: 6px; } /* 操作按钮间距 */
-.btn { border: 1px solid #e5e7eb; border-radius: 8px; height: 28px; padding: 0 8px; background: #fff; font-size: 12px; cursor: pointer; } /* 通用按钮样式 */
-.btn:hover { background: #f3f4f6; } /* 悬停微弱变色 */
-.btn.del { color: #b00020; border-color: #fca5a5; } /* 删除按钮的红色提示 */
-.btn.save { background: #111827; color: #fff; } /* 保存按钮的深色强调 */
-.btn[disabled] { opacity: 0.6; cursor: not-allowed; } /* 禁用按钮样式 */
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.btn {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  height: 28px;
+  padding: 0 8px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 56px;
+  line-height: 28px;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn:hover {
+  background: #f3f4f6;
+}
+.btn.del {
+  color: #b00020;
+  border-color: #fca5a5;
+}
+.btn.save {
+  background: #111827;
+  color: #fff;
+}
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 完成状态按钮样式 */
+.btn.done-toggle {
+  position: relative;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+.btn.done-toggle::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5f5;
+  border-radius: 4px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+.btn.done-toggle::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 12px;
+  border-right: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transform: rotate(45deg);
+  top: 7px;
+  left: 50%;
+  margin-left: -4px;
+}
+.btn.done-toggle.is-done::before {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.btn.done-toggle.is-done::after {
+  border-right-color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+.btn.done-toggle:hover::before {
+  border-color: #94a3b8;
+}
+.btn.done-toggle:focus-visible {
+  outline: 2px solid #94a3b8;
+  outline-offset: 2px;
+}
 
 /* 行内编辑的输入框样式 */
-.editbox { width: 100%; min-height: 56px; max-height: 180px; padding: 6px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; resize: vertical; } /* 编辑状态的 textarea 样式 */
-.editbox:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148,163,184,0.25); } /* 聚焦高亮 */
+.editbox {
+  width: 100%;
+  min-height: 56px;
+  max-height: 180px;
+  padding: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  flex: 1;
+}
+.editbox:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.25);
+}
 
 /* 统一盒模型，避免 padding 影响可用宽度 */
-* { box-sizing: border-box; } /* 新增 */
-
-/* 行内编辑时：让 textarea 占满剩余空间，避免挤压右侧按钮 */
-.editbox { flex: 1; } /* 新增，让编辑框自动伸展 */
-
-/* 右侧按钮列固定为竖排，且不参与收缩 */
-.actions { flex: 0 0 auto; flex-direction: column; align-items: stretch; } /* 新增/强化 */
-
-/* 防止按钮中文换行，并给出舒适的最小宽度 */
-.btn { white-space: nowrap; min-width: 56px; line-height: 28px; } /* 新增/覆盖 */
+* {
+  box-sizing: border-box;
+}
