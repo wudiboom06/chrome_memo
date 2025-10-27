@@ -1,22 +1,22 @@
 <!-- popup/index.html：弹窗主页面，包含输入区、消息区与笔记列表 -->
-<!DOCTYPE html> <!-- 声明文档类型为 HTML5 -->
-<html lang="zh-CN"> <!-- 设置页面语言为简体中文 -->
-<head> <!-- 文档头部开始 -->
-  <meta charset="UTF-8" /> <!-- 使用 UTF-8 编码 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- 适配小尺寸弹窗 -->
-  <title>Memo</title> <!-- 弹窗标题 -->
-  <link rel="stylesheet" href="./popup.css" /> <!-- 引入弹窗样式表 -->
-</head> <!-- 文档头部结束 -->
-<body> <!-- 文档主体开始 -->
-  <div id="app"> <!-- 外层容器，控制弹窗整体布局 -->
-    <h1 class="title">备忘录</h1> <!-- 顶部标题文本 -->
-    <div class="editor"> <!-- 顶部输入区域容器 -->
-      <textarea id="newContent" rows="3" placeholder="请输入备忘内容..." aria-label="新备忘内容"></textarea> <!-- 多行输入框，供新增使用 -->
-      <button id="saveBtn" disabled>保存</button> <!-- 保存按钮，空内容时禁用 -->
-    </div> <!-- 顶部输入区域结束 -->
-    <div id="msg" role="status" aria-live="polite"></div> <!-- 消息提示区域，显示错误或成功信息 -->
-    <ul id="list" class="list" aria-label="备忘列表"></ul> <!-- 列表容器，渲染笔记项 -->
-  </div> <!-- 外层容器结束 -->
-  <script type="module" src="./popup.js"></script> <!-- 以 ES Module 方式加载弹窗逻辑 -->
-</body> <!-- 文档主体结束 -->
-</html> <!-- 文档结束 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memo</title>
+  <link rel="stylesheet" href="./popup.css" />
+</head>
+<body>
+  <div id="app">
+    <h1 class="title">备忘录</h1>
+    <div class="editor">
+      <textarea id="newContent" rows="3" placeholder="请输入备忘内容..." aria-label="新备忘内容"></textarea>
+      <button id="saveBtn" disabled>保存</button>
+    </div>
+    <div id="msg" role="status" aria-live="polite"></div>
+    <ul id="list" class="list" aria-label="备忘列表"></ul>
+  </div>
+  <script type="module" src="./popup.js"></script>
+</body>
+</html>

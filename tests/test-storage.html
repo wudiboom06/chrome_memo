@@ -1,4 +1,4 @@
-<!-- tests/test-storage.html：基于 mock 的 storage 单元测试，浏览器直开或本地服务器均可 -->
+<!-- tests/test-storage.html：基于 mock 的 storage 封装单元测试，浏览器直开或本地服务器均可 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -17,11 +17,10 @@
 
   <script type="module">
     // 先注入 mock 的 chrome.storage.local，确保在导入被测模块前完成
-    const _store = {};                                               // 内存键值存储
+    const _store = {};
     window.chrome = {
       storage: {
         local: {
-          // 兼容 string / string[] / {key: default} 三种调用形态
           get(keys, cb) {
             const result = {};
             if (typeof keys === 'string') {
@@ -29,28 +28,28 @@
             } else if (Array.isArray(keys)) {
               keys.forEach(k => { result[k] = _store[k]; });
             } else if (keys && typeof keys === 'object') {
-              Object.assign(result, keys);                            // 先填充默认值
-              for (const k in _store) result[k] = _store[k];         // 再覆盖已有值
+              Object.assign(result, keys);
+              for (const k in _store) result[k] = _store[k];
             }
-            setTimeout(() => cb(result), 0);                         // 异步回调
+            setTimeout(() => cb(result), 0);
           },
           set(items, cb) {
-            Object.assign(_store, items);                            // 写入或覆盖
-            setTimeout(() => cb && cb(), 0);                         // 异步回调
+            Object.assign(_store, items);
+            setTimeout(() => cb && cb(), 0);
           },
           remove(keys, cb) {
-            const arr = Array.isArray(keys) ? keys : [keys];         // 规范为数组
-            arr.forEach(k => { delete _store[k]; });                 // 删除键
-            setTimeout(() => cb && cb(), 0);                         // 异步回调
+            const arr = Array.isArray(keys) ? keys : [keys];
+            arr.forEach(k => { delete _store[k]; });
+            setTimeout(() => cb && cb(), 0);
           }
         }
       },
-      runtime: {}                                                    // 仅为兼容 lastError 访问
+      runtime: {}
     };
 
     // 延后导入，被测模块会读取上面注入的 mock
-    const storageMod = await import('../lib/storage.js');            // 导入被测模块
-    const idMod = await import('../lib/id.js');                      // 导入 ID 生成器
+    const storageMod = await import('../lib/storage.js');
+    const idMod = await import('../lib/id.js');
 
     // 简单断言与日志输出
     const $log = document.getElementById('log');
@@ -64,50 +63,69 @@
 
     // 用例 1：初始读取应为空数组
     {
-      const list = await storageMod.getNotes();                      // 调用被测函数
-      assert('初始应为空数组', Array.isArray(list) && list.length === 0); // 断言为空
+      const list = await storageMod.getNotes();
+      assert('初始应为空数组', Array.isArray(list) && list.length === 0);
     }
 
-    // 用例 2：新增两条，检查数量与排序（按 updatedAt 倒序）
-    let id1 = idMod.generateId();                                    // 生成 ID1
-    let now = Date.now();                                            // 当前时间戳
-    await storageMod.addNote({                                       // 新增第一条
-      id: id1, content: 'hello', createdAt: now, updatedAt: now
+    // 用例 2：新增两条，检查数量、排序与默认完成状态
+    let id1 = idMod.generateId();
+    let now = Date.now();
+    await storageMod.addNote({
+      id: id1, content: 'hello', createdAt: now, updatedAt: now, done: false
     });
-    let id2 = idMod.generateId();                                    // 生成 ID2
-    now += 5;                                                        // 确保更晚的时间
-    await storageMod.addNote({                                       // 新增第二条
-      id: id2, content: 'world', createdAt: now, updatedAt: now
+    let id2 = idMod.generateId();
+    now += 5;
+    await storageMod.addNote({
+      id: id2, content: 'world', createdAt: now, updatedAt: now, done: false
     });
     {
-      const list = await storageMod.getNotes();                      // 读取
-      assert('新增后数量为 2', list.length === 2);                    // 数量 = 2
-      assert('排序应为第二条在前', list[0].id === id2);               // 新的在前
+      const list = await storageMod.getNotes();
+      assert('新增后数量为 2', list.length === 2);
+      assert('新增项未完成', list.every(n => n.done === false));
+      assert('排序应为第二条在前', list[0].id === id2);
     }
 
-    // 用例 3：更新第一条的内容，并验证被移动到顶部且内容变更
+    // 用例 3：设置第一条为完成，验证排序与完成状态
     {
-      await storageMod.updateNote(id1, 'hello-updated');             // 更新 ID1
-      const list = await storageMod.getNotes();                      // 读取
-      assert('更新后移动到顶部', list[0].id === id1);                 // 顶部应为 ID1
-      assert('更新后内容已变更', list[0].content === 'hello-updated'); // 内容更新
+      const updated = await storageMod.setNoteDone(id1, true);
+      assert('设置完成返回 done=true', updated.done === true);
+      const list = await storageMod.getNotes();
+      assert('完成的放在列表底部', list[list.length - 1].id === id1);
+      assert('未完成的仍在顶部', list[0].done === false);
     }
 
-    // 用例 4：删除并验证数量变化与返回值
+    // 用例 4：更新已完成项内容，仍应留在底部
     {
-      const ok = await storageMod.deleteNote(id2);                   // 删除 ID2
-      const list = await storageMod.getNotes();                      // 读取
-      assert('删除返回 true', ok === true);                           // 返回 true
-      assert('删除后数量为 1', list.length === 1);                     // 剩 1 条
-      assert('剩余的应是 ID1', list[0].id === id1);                   // 剩余为 ID1
+      await storageMod.updateNote(id1, 'hello-updated');
+      const list = await storageMod.getNotes();
+      assert('完成项仍在底部', list[list.length - 1].id === id1);
+      assert('内容已更新', list[list.length - 1].content === 'hello-updated');
+      assert('完成标记仍为 true', list[list.length - 1].done === true);
     }
 
-    // 用例 5：异常路径校验（示例：空内容更新）
+    // 用例 5：恢复为未完成，排序回到顶部
+    {
+      const updated = await storageMod.setNoteDone(id1, false);
+      assert('恢复后 done=false', updated.done === false);
+      const list = await storageMod.getNotes();
+      assert('恢复未完成后回到顶部', list[0].id === id1);
+    }
+
+    // 用例 6：删除并验证数量变化与返回值
+    {
+      const ok = await storageMod.deleteNote(id2);
+      const list = await storageMod.getNotes();
+      assert('删除返回 true', ok === true);
+      assert('删除后数量为 1', list.length === 1);
+      assert('剩余的应为 ID1', list[0].id === id1);
+    }
+
+    // 用例 7：异常路径校验（示例：空内容更新）
     try {
-      await storageMod.updateNote(id1, '   ');                       // 试图更新为空
-      assert('空内容更新应抛错', false);                              // 不应走到这里
+      await storageMod.updateNote(id1, '   ');
+      assert('空内容更新应抛错', false);
     } catch (e) {
-      assert('空内容更新已抛错', /不能为空/.test(String(e?.message)));   // 捕获到错误
+      assert('空内容更新已抛错', /不能为空/.test(String(e?.message)));
     }
   </script>
 </body>
